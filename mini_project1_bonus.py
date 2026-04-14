@@ -1,5 +1,5 @@
 """
-Mini-Project 1: The Matrix Architect
+Mini-Project 1: The Matrix Architect, Bonus Challenge
 Math 108C: Applied Linear Algebra
 PropTech AI - Design Matrix Builder
 """
@@ -87,6 +87,33 @@ def build_design_matrix(df: pd.DataFrame) -> np.ndarray:
 
     return X, COLUMN_ORDER
 
+
+# ── Optional Challenge: Merge Condo + Townhome → Attached_Unit ───────────────
+
+TYPE_ORDER_MERGED = ["Bungalow", "Attached_Unit", "Estate", "House", "Loft", "Mansion", "Studio"]
+COLUMN_ORDER_MERGED = ["SqFt", "ConditionEncoded"] + TYPE_ORDER_MERGED
+
+def build_design_matrix_merged(df: pd.DataFrame) -> np.ndarray:
+    """
+    Same as build_design_matrix but merges Condo and Townhome into Attached_Unit.
+    Returns X of shape (n_houses, 9).
+    """
+    df = df.copy()
+
+    # Merge before encoding
+    df["Type"] = df["Type"].replace({"Condo": "Attached_Unit", "Townhome": "Attached_Unit"})
+
+    df["ConditionEncoded"] = df["Condition"].map(CONDITION_MAP)
+
+    for t in TYPE_ORDER_MERGED:
+        df[t] = (df["Type"] == t).astype(int)
+
+    X_df = df[COLUMN_ORDER_MERGED]
+    X = X_df.to_numpy(dtype=float)
+
+    return X, COLUMN_ORDER_MERGED
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -126,3 +153,17 @@ if __name__ == "__main__":
     X_df_display.index = df["ID"].values
     X_df_display.index.name = "ID"
     print(X_df_display.to_string())
+
+    # ── Optional Challenge ────────────────────────────────────────────────────
+    print("\n" + "=" * 60)
+    print("OPTIONAL CHALLENGE -- Condo + Townhome -> Attached_Unit")
+    print("=" * 60)
+
+    X_merged, cols_merged = build_design_matrix_merged(df)
+    print(f"\nColumn order: {cols_merged}")
+    print(f"Matrix shape: {X_merged.shape}  (expected: (20, 9))\n")
+
+    X_merged_display = pd.DataFrame(X_merged, columns=cols_merged)
+    X_merged_display.index = df["ID"].values
+    X_merged_display.index.name = "ID"
+    print(X_merged_display.to_string())
