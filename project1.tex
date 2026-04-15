@@ -1,0 +1,344 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{float}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.75em}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{MATH 108C Project 1: Design Matrix Construction for Housing Data}}\\[0.5em]
+    {\large Katie Brubaker, Siyu Chen, Andrea Macias}\\[0.5em]
+    {\large April 14, 2026}
+\end{center}
+
+\vspace{1em}
+
+\section{Theory Checkpoint and Additional Questions}
+
+\textbf{1) Is this project an example of supervised learning or unsupervised learning? Explain.}
+
+This project is an example of supervised learning because we are predicting an output (housing prices) from inputs (data about houses). We will use this data to predict what the price of a house will be based on data given.
+
+\textbf{2) Is the housing-price setting best modeled as a regression problem or a classification problem? Explain.}
+
+This would be an example of regression. The data about the house are our $x_i$ and the house price is the $y_i$. Since we are outputting a specific numerical value, this is a regression problem.
+
+\textbf{3) In this dataset, what is one observation? What is one feature?}
+
+One observation in this dataset is a single house (such as one which is 2500 ft$^2$, a house rated good, and a standard family home). One feature is any of the attributes from an observation, such as SqFt or type.
+
+\textbf{4) Why should ID not be included as a feature in the design matrix $X$?}
+
+House ID should not be included as a feature as it does not have any effect on the house price and it does not contain any actual information about the house.
+
+\textbf{5) Why is Condition appropriate for ordinal encoding, while Type requires one-hot encoding?}
+
+Condition is appropriate for ordinal encoding because it has a specific order that can be converted to a numerical value. This order goes from bad to good with worse conditions being a lower number which goes higher as condition gets better. Type requires one-hot encoding as there is no natural order to the type of house it is, each type is its own specific thing.
+
+\textbf{6) State one advantage and one limitation of ordinal encoding in this context.}
+
+One advantage of ordinal encoding is that it shows the quality of some houses are better than others. This would be beneficial in predicting housing price as a higher quality home would have a higher price than a lower quality house. A limitation is that since the conditions in our data are poor, fair, good, and excellent, ordinal encoding would assume that the difference between each word is one length 1 apart, while there could be a more dramatic difference between poor and fair than there is between fair and good.
+
+\textbf{7) State one advantage and one limitation of one-hot encoding in this context.}
+
+One advantage of one-hot encoding in this context is that the data of the house type can be represented without giving each type an order, which would make it seem like the order matters. One limitation of one-hot encoding is that it will increase the number of columns in our dataset, which could make the program take longer to run.
+
+\textbf{8) For the baseline design, what are the dimensions of the matrix $X$?}
+
+The dimensions of matrix $X$ in the baseline design are $20 \times 10$.
+
+\textbf{9) If you add $k$ binary keyword flags extracted from the Notes column, how do the feature vector length $n$ and the dimensions of $X$ change?}
+
+If you add $k$ binary keyword flags extracted from the notes column, the feature vector length $n$ would be $n+k$, in our case $10+k$, making the dimensions of $X$ $20 \times (10+k)$.
+
+\section{The Blueprint (the math)}
+
+\textbf{1) Numerical features: Which columns can remain as they are in $X$?}
+
+Only the square footage column remains as it is in $X$.
+
+\textbf{2) Ordinal encoding (Condition): Define and use this rule: Poor $\to 0$, Fair $\to 1$, Good $\to 2$, Excellent $\to 3$.}
+
+Done \checkmark
+
+\textbf{3) One-hot encoding (Type) with a fixed order: The column Type is categorical. One-hot encode it using alphabetical column order:}
+
+\[
+[\text{Bungalow, Condo, Estate, House, Loft, Mansion, Studio, Townhome}]
+\]
+
+(Example: a Loft row has a 1 in the “Loft” column and 0 in the other Type columns.)
+
+Done \checkmark
+
+\textbf{4) Define your feature vector and compute $n$: Your baseline feature vector should include:}
+
+\[
+x_i = [\text{SqFt, ConditionEncoded, TypeOneHot(8 columns)}]
+\]
+
+Done \checkmark
+
+\textbf{Question: What is $n$ for this baseline design? (Do not include ID or Notes.)}
+
+For the baseline design, $n=10$.
+
+\textbf{5) Strategy for Unstructured Text (Notes): The Notes column contains raw text. Although we will exclude it from the baseline implementation to keep the code simple, propose a Keyword Flag rule:}
+
+\begin{itemize}
+    \item Define a binary feature based on the text (e.g., ``HasPool'' = 1 if ``pool'' is found).
+
+    For house 10, the note is ``Gated community.'' This could be ``Gated'' = 1 if ``gate'' is found.
+
+    \item If you included this feature in $X$, what would the new $n$ be?
+
+    The new $n$ would be $10+$ the amount of binary features we add. If we are only adding ``HasPool,'' the new $n$ would be 11. If we are adding a binary feature to fit each of the notes on the houses that we are given, we would need an additional 20 binary features, making our new $n=30$.
+
+    \item How many extra columns would you need to encode all the information in the notes?
+
+    To encode all the information in the notes, you would need 20 more columns, as the notes are all unique and not repeated in the data we are given.
+\end{itemize}
+
+\textbf{Extra info:}
+\begin{itemize}
+    \item The only column we kept as is was the square footage column.
+    \item The columns that were excluded were the notes column and the ID column, however we still displayed ID in our project’s output for readability.
+    \item The condition column was ordinal encoded. The type column was one-hot encoded, taking up 8 columns.
+    \item Our feature vector is ordered: square footage, condition, bungalow, condo, estate, house, loft, mansion, studio, townhome.
+    \item The dimensions of the final matrix are $20 \times 10$.
+\end{itemize}
+
+\section{AI Prompt and Verification Notes}
+
+\textbf{Prompt used:}
+
+I have a housing dataset and need you to write a clean, well-structured Python script using pandas and numpy to build a design matrix $X$. Follow my blueprint exactly --- do not deviate from the column order or encoding rules.
+
+\textbf{Raw Data (embed this directly in the script as a string constant called RAW\_DATA):}
+
+\begin{verbatim}
+ID,SqFt,Type,Condition,Notes
+1,2500,House,Good,Standard family home.
+2,850,Condo,Fair,Needs new paint.
+3,1200,Townhome,Excellent,Fully renovated!
+4,3500,Estate,Excellent,Large estate with pool.
+5,900,Condo,Poor,Major repairs needed.
+6,1100,Loft,Good,Open concept downtown.
+7,2800,House,Fair,Old roof good bones.
+8,1500,Townhome,Good,Near the park.
+9,600,Studio,Excellent,High-rise view.
+10,3200,Estate,Good,Gated community.
+11,2100,House,Poor,Foreclosure water damage.
+12,950,Condo,Good,Low HOA fees.
+13,1300,Loft,Fair,Noisy street.
+14,1700,Townhome,Excellent,End unit.
+15,4000,Mansion,Excellent,Historic landmark.
+16,750,Studio,Fair,First floor unit.
+17,2300,House,Good,Solar panels included.
+18,1400,Bungalow,Poor,Foundation issues.
+19,2600,House,Excellent,Chef's kitchen.
+20,800,Condo,Good,Walking distance to metro.
+\end{verbatim}
+
+\textbf{Blueprint --- implement this exactly:}
+
+Encoding constants (define these as module-level variables):
+
+\begin{itemize}
+    \item CONDITION\_MAP: dict mapping Poor = 0, Fair = 1, Good = 2, Excellent = 3
+    \item TYPE\_ORDER: the fixed alphabetical list \\
+    \texttt{["Bungalow", "Condo", "Estate", "House", "Loft", "Mansion", "Studio", "Townhome"]}
+    \item COLUMN\_ORDER: \texttt{["SqFt", "ConditionEncoded"] + TYPE\_ORDER}
+\end{itemize}
+
+Function \texttt{build\_design\_matrix(df):}
+\begin{itemize}
+    \item Takes a raw DataFrame with columns ID, SqFt, Type, Condition, Notes
+    \item Excludes ID and Notes entirely
+    \item Keeps SqFt as-is
+    \item Ordinal-encodes Condition into a new column ConditionEncoded using CONDITION\_MAP; raise a ValueError listing unknown values if any are found
+    \item One-hot encodes Type by manually creating one binary column per type in TYPE\_ORDER
+    \item Raises a ValueError if any unknown Type value is encountered
+    \item Selects columns in the exact order defined by COLUMN\_ORDER
+    \item Returns a tuple \texttt{(X, COLUMN\_ORDER)} where X is a numpy array of dtype float and shape \texttt{(20, 10)}
+\end{itemize}
+
+Optional challenge --- function \texttt{build\_design\_matrix\_merged(df):}
+\begin{itemize}
+    \item Same as above, but before encoding, replace ``Condo'' and ``Townhome'' with ``Attached\_Unit''
+    \item Use \texttt{TYPE\_ORDER\_MERGED = ["Bungalow", "Attached\_Unit", "Estate", "House", "Loft", "Mansion", "Studio"]}
+    \item Returns \texttt{(X\_merged, COLUMN\_ORDER\_MERGED)} with shape \texttt{(20, 9)}
+\end{itemize}
+
+\texttt{if \_\_name\_\_ == "\_\_main\_\_"} block must:
+\begin{itemize}
+    \item Load RAW\_DATA using \texttt{pd.read\_csv(io.StringIO(RAW\_DATA))} and strip column name whitespace
+    \item Call \texttt{build\_design\_matrix} and print:
+    \begin{itemize}
+        \item The column order
+        \item \texttt{X.shape} with annotation \texttt{(expected: (20, 10))}
+        \item Row Audit for ID = 4 (index 3)
+        \item Print the hardcoded manual vector \texttt{[3500, 3, 0, 0, 1, 0, 0, 0, 0, 0]}
+        \item Print the computed \texttt{X[3]}
+        \item Print PASS or FAIL based on whether they match
+        \item Print the full matrix as a DataFrame with ID as the index (use \texttt{df["ID"].values})
+    \end{itemize}
+    \item Call \texttt{build\_design\_matrix\_merged} and print its column order, shape \texttt{(expected: (20, 9))}, and full matrix the same way
+\end{itemize}
+
+Use clear section separator comments and a docstring on each function explaining the encoding logic and return values.
+
+\textbf{Notes:}
+
+I followed the logic in each encoding of the \texttt{build\_design\_matrix} method especially for the condition and type encoding. Then I checked the \texttt{build\_design\_matrix\_merged} logic. Then I ran the method and manually hardcoded the row audit to 3 different rows to make sure that the audit is working, and checked if the result agreed with the expected output, and it did.
+
+In addition, we made sure that the AI-generated code followed the exact column order from our blueprint instead of accepting the output blindly. We verified the row audit and checked that the matrix dimensions matched the expected shape.
+
+\section{Matrix Audit}
+
+\textbf{1) Manual Calculation: Look at Row ID 4 (The Estate) in the Raw Data table. Based on your Blueprint from Phase 1, write down the vector $x_4$ exactly as it should appear.}
+
+\[
+x_4 = [3500,\, 3,\, 0,\, 0,\, 1,\, 0,\, 0,\, 0,\, 0,\, 0]
+\]
+
+\textbf{2) Code Verification: In your Python notebook, print the row at index 3 (which corresponds to ID 4).}
+
+\textbf{3) Comparison: Does the computer output match your manual calculation perfectly?}
+
+\begin{itemize}
+    \item If the ``Estate'' column index is shifted even by one position, your model is broken.
+    \item Screenshot of the comparison can be inserted here if desired.
+\end{itemize}
+
+This perfectly matches vector $x_4$ from the blueprint.
+
+\section{Final Matrix Output}
+
+\subsection*{Baseline Design Matrix $X$}
+
+\begin{center}
+\scriptsize
+\begin{longtable}{c c c c c c c c c c c}
+\toprule
+ID & SqFt & ConditionEncoded & Bungalow & Condo & Estate & House & Loft & Mansion & Studio & Townhome \\
+\midrule
+1  & 2500.0 & 2.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+2  & 850.0  & 1.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+3  & 1200.0 & 3.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 \\
+4  & 3500.0 & 3.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+5  & 900.0  & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+6  & 1100.0 & 2.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 \\
+7  & 2800.0 & 1.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+8  & 1500.0 & 2.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 \\
+9  & 600.0  & 3.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 \\
+10 & 3200.0 & 2.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+11 & 2100.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+12 & 950.0  & 2.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+13 & 1300.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 \\
+14 & 1700.0 & 3.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 \\
+15 & 4000.0 & 3.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 \\
+16 & 750.0  & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 \\
+17 & 2300.0 & 2.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+18 & 1400.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+19 & 2600.0 & 3.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+20 & 800.0  & 2.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Final Reflection}
+
+\textbf{Which ideas from Chapter 1 were essential for completing this project?}
+
+The ideas from Chapter 1 which were most essential for completing this project were supervised learning, regression, and encoding data into numerical form. This project’s main focus is on supervised learning, since the code is taking data and then making a code which is meant to be able to run with any other house which was not a part of the original sample (which helped calibrate the code). Regression is then used when the output is a continuous value, such as housing prices, and encoding data into numerical form was necessary when some features of the house were described through words and could therefore not be put into a matrix form.
+
+\textbf{How did the notions of feature vector and data matrix guide your work?}
+
+The concept of a feature vector helped us represent each house as a numerical vector $x_i$ which contains square footage, encoded condition, and one-hot encoded type variables. Then, the idea of a data matrix allowed us to combine multiple vectors into a matrix $X$ in which each row is an observation and each column is a feature. All vectors have the same length, forming an $m \times n$ matrix. In this way, we were consistent with all of the provided data and applied linear algebra techniques to a dataset.
+
+\textbf{Why did you choose ordinal encoding for one variable and one-hot encoding for another?}
+
+We used ordinal encoding for the Condition variable because it has a natural order (Poor $<$ Fair $<$ Good $<$ Excellent), meaning that it would be more simple to assign numerical values which keep this relationship present. Meanwhile, one-hot encoding was necessary for the Type variable because it consists of categories which do not have an inherent order; one-hot encoding allows us to assign these categories associated numerical values without creating a false relationship between them.
+
+\textbf{How did the coding part help you understand the mathematics more clearly?}
+
+The coding part helped me understand mathematics more clearly because it concretely showed how feature vectors and matrices are constructed from real data sets. Applying the encoding and checking individual rows was a way to double-check the mathematical design, making a vivid image of how linear algebra applies to industry and real scenarios.
+
+\section{Optional Challenge}
+
+\textbf{1) Adjust your Blueprint: How does this change the vector size $n$?}
+
+Adjusting the Blueprint means that the original 8 columns dedicated to the ``Types'' category decreases to 7 columns, since ``Townhome'' and ``Condo'' are combining to become a new ``Attached\_Unit'' column. The ``Attached\_Unit'' column is 1 when either ``Townhome'' or ``Condo'' are 1, and 0 whenever both ``Townhome'' and ``Condo'' are 0.
+
+Thus, the updated feature vector is
+\[
+x_i = [\text{SqFt, ConditionEncoded, Bungalow, Attached\_Unit, Estate, House, Loft, Mansion, Studio}]
+\]
+so the new vector size is $n=9$.
+
+\textbf{2) Modify your prompt to Gemini to achieve this merge before one-hot encoding.}
+
+Done \checkmark
+
+The modified prompt specified that before one-hot encoding, the categories ``Condo'' and ``Townhome'' should first be replaced with a single category called ``Attached\_Unit,'' and then encoded using the fixed column order.
+
+\textbf{3) Verify the new matrix dimensions and check that the columns are still in the correct order.}
+
+The new matrix dimensions are correct and all the columns are still in the correct order; they appear in the following way:
+
+\[
+[\text{SqFt, ConditionEncoded, Bungalow, Attached\_Unit, Estate, House, Loft, Mansion, Studio}]
+\]
+
+The updated matrix has dimensions $20 \times 9$.
+
+\subsection*{Merged Design Matrix $X_{\text{merged}}$}
+
+\begin{center}
+\scriptsize
+\begin{longtable}{c c c c c c c c c c}
+\toprule
+ID & SqFt & ConditionEncoded & Bungalow & Attached\_Unit & Estate & House & Loft & Mansion & Studio \\
+\midrule
+1  & 2500.0 & 2.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 \\
+2  & 850.0  & 1.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+3  & 1200.0 & 3.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+4  & 3500.0 & 3.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+5  & 900.0  & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+6  & 1100.0 & 2.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 \\
+7  & 2800.0 & 1.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 \\
+8  & 1500.0 & 2.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+9  & 600.0  & 3.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 \\
+10 & 3200.0 & 2.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+11 & 2100.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 \\
+12 & 950.0  & 2.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+13 & 1300.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 \\
+14 & 1700.0 & 3.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+15 & 4000.0 & 3.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 \\
+16 & 750.0  & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.0 \\
+17 & 2300.0 & 2.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 \\
+18 & 1400.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+19 & 2600.0 & 3.0 & 0.0 & 0.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 \\
+20 & 800.0  & 2.0 & 0.0 & 1.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\end{document}
