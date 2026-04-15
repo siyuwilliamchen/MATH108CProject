@@ -172,18 +172,18 @@ def define_weight_vectors() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     # ── Scenario 1: Baseline (Rational Market) ──────────────────────────────
     w1 = np.array([
-        350_000,   # w0  intercept  (~mean sale price)
+        200_000,   # w0  intercept  (underestimating Miami's baseline; ~$200k)
         # Structure (positive = adds value)
-         80_000,   # w1  TOT_LVG_AREA    (+$80k per SD)
+         70_000,   # w1  TOT_LVG_AREA    (+$70k per SD)
          25_000,   # w2  LND_SQFOOT      (+$25k per SD)
-         60_000,   # w3  structure_quality (+$60k per SD)
-        -20_000,   # w4  age             (older = lower value)
-         30_000,   # w5  SPEC_FEAT_VAL   (+$30k per SD)
+         55_000,   # w3  structure_quality (+$55k per SD)
+        -15_000,   # w4  age             (older = lower value)
+         28_000,   # w5  SPEC_FEAT_VAL   (+$28k per SD)
         # Location (negative = farther away = less valuable)
-        -55_000,   # w6  OCEAN_DIST
+        -50_000,   # w6  OCEAN_DIST
         -20_000,   # w7  WATER_DIST
-        -25_000,   # w8  CNTR_DIST
-        -15_000,   # w9  SUBCNTR_DI
+        -20_000,   # w8  CNTR_DIST
+        -12_000,   # w9  SUBCNTR_DI
          10_000,   # w10 HWY_DIST  (farther from highway = quieter = better)
     ])
 
