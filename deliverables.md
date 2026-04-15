@@ -144,27 +144,27 @@ W ∈ ℝ^(d×3) and X ∈ ℝ^(n×d). For WX to be defined, the inner dimension
 
 ## 4. Decision Point B: Market Scenarios
 
-### Scenario 3 — "The Luxury Premium"
+### Scenario 3 — "The Crash" (Archetype A)
 
-**Name:** The Luxury Premium
+**Name:** The Crash
 
-**Logic:** This scenario models a high-end buyer segment (e.g., second-home buyers, international investors) who care only about two things: build quality and ocean proximity. Lot size, distance to subcenters, water features, and highway access are irrelevant to this buyer. New construction is strongly preferred, so age is heavily penalized. The baseline intercept is inflated to $500,000 to reflect a premium market entry point.
+**Logic:** This scenario implements Archetype A (The Crash) from the project specification: a global level shift. All relative feature weights are kept identical to Scenario 1 (Rational Market), but the intercept is massively dropped from +$200,000 to −$100,000 to simulate a severe market recession. Every home loses approximately $300,000 of baseline value regardless of its features — the crash affects the whole market uniformly, not any particular property type.
 
 ### Weight Vectors
 
 ```
-Index  Feature            w1 (Baseline)   w2 (Location)   w3 (Luxury)
-  0    Intercept          $200,000        $350,000        $500,000
+Index  Feature            w1 (Baseline)   w2 (Location)   w3 (The Crash)
+  0    Intercept          $200,000        $350,000        -$100,000
   1    TOT_LVG_AREA       +$70,000        +$5,000         +$70,000
-  2    LND_SQFOOT         +$25,000        +$2,000         +$5,000
-  3    structure_quality  +$55,000        +$3,000         +$120,000
-  4    age                -$15,000        -$1,000         -$50,000
-  5    SPEC_FEAT_VAL      +$28,000        +$2,000         +$40,000
-  6    OCEAN_DIST         -$50,000        -$165,000       -$160,000
-  7    WATER_DIST         -$20,000        -$60,000        $0
-  8    CNTR_DIST          -$20,000        -$75,000        $0
-  9    SUBCNTR_DI         -$12,000        -$45,000        $0
- 10    HWY_DIST           +$10,000        +$30,000        $0
+  2    LND_SQFOOT         +$25,000        +$2,000         +$25,000
+  3    structure_quality  +$55,000        +$3,000         +$55,000
+  4    age                -$15,000        -$1,000         -$15,000
+  5    SPEC_FEAT_VAL      +$28,000        +$2,000         +$28,000
+  6    OCEAN_DIST         -$50,000        -$165,000       -$50,000
+  7    WATER_DIST         -$20,000        -$60,000        -$20,000
+  8    CNTR_DIST          -$20,000        -$75,000        -$20,000
+  9    SUBCNTR_DI         -$12,000        -$45,000        -$12,000
+ 10    HWY_DIST           +$10,000        +$30,000        +$10,000
 ```
 
 Units: dollars per 1 standard deviation of each (Z-score standardized) feature.
@@ -294,17 +294,17 @@ Least-squares solution computed via `np.linalg.lstsq(X, y, rcond=None)`.
 | Model | MAE |
 |---|---|
 | Least Squares (Optimal) | **$115,510** |
-| Scenario 3 — The Luxury Premium | $181,319 |
 | Scenario 1 — Baseline (Rational Market) | $202,116 |
 | Scenario 2 — Location is Everything | $250,389 |
+| Scenario 3 — The Crash | $499,943 |
 
 > Bar chart saved to `mae_scoreboard.png`
 
 **Key observations:**
-- Least Squares achieves the lowest MAE ($115,510), as expected — it is the data-optimal solution by construction.
-- Scenario 3 (Luxury Premium) performs second-best ($181,319): the strong ocean-proximity weight aligns well with Miami's actual price structure, even if the zero weights on other location features are an oversimplification.
-- Scenario 1 (Baseline, $202,116) uses plausible signs but underestimates the baseline intercept (~$200k vs. the data-implied ~$400k) and underweights key location drivers like OCEAN_DIST, leading to systematic under-prediction.
-- Scenario 2 (Location is Everything, $250,389) has the worst MAE: collapsing structure weights to near zero discards half the predictive signal, causing large errors on high-quality inland properties.
+- Least Squares achieves the lowest MAE ($115,510) — it is the data-optimal solution by construction, and no hand-chosen scenario beats it.
+- Scenario 1 (Baseline, $202,116) uses plausible relative weights but underestimates Miami's market baseline (~$200k intercept vs. the data-implied ~$400k), leading to systematic under-prediction across all houses.
+- Scenario 2 (Location is Everything, $250,389): collapsing structure weights to near zero discards half the predictive signal, causing large errors on high-quality inland properties.
+- Scenario 3 (The Crash, $499,943) has the worst MAE by design: dropping the intercept to −$100,000 means the model predicts every home as worth ~$300,000 less than reality, demonstrating how a single miscalibrated parameter can dominate all prediction error.
 
 ---
 
@@ -312,4 +312,4 @@ Least-squares solution computed via `np.linalg.lstsq(X, y, rcond=None)`.
 
 The essential Chapter 2 ideas in this project were **matrix-vector multiplication** (ŷ = Xw), **matrix-matrix multiplication** (P = XW), **dimension compatibility**, and **partitioned/block matrices**. Every phase reduced to a question of what shape a matrix product would take and what each entry of that product meant in the housing context.
 
-The product Xw computes one prediction vector under a single pricing policy. The matrix product XW extends this to three policies simultaneously — each column of W encodes a different market hypothesis, and the corresponding column of P = XW gives every house's predicted price under that scenario. This allows side-by-side comparison across all 13,932 houses without repeating the computation. The partitioned-matrix decomposition added interpretive power: by splitting X into [**1** | X_struc | X_loc], we could decompose any prediction into a base component, a structure-driven component, and a location-driven component — making it possible to say not just *what* a model predicts, but *why*. The least-squares comparison was the most instructive check: all three hand-chosen scenarios produced MAEs of $181k–$250k, roughly 1.6–2.2× worse than the data-optimal $115k. The biggest source of error in Scenario 1 was underestimating Miami's market baseline (intercept set to $200k vs. the OLS-implied $400k) and underweighting city-center distance — illustrating that even economically sensible weight choices miss systematic patterns that only the data can reveal.
+The product Xw computes one prediction vector under a single pricing policy. The matrix product XW extends this to three policies simultaneously — each column of W encodes a different market hypothesis, and the corresponding column of P = XW gives every house's predicted price under that scenario. This allows side-by-side comparison across all 13,932 houses without repeating the computation. The partitioned-matrix decomposition added interpretive power: by splitting X into [**1** | X_struc | X_loc], we could decompose any prediction into a base component, a structure-driven component, and a location-driven component — making it possible to say not just *what* a model predicts, but *why*. The least-squares comparison was the most instructive check: all three hand-chosen scenarios produced MAEs of $202k–$500k, all worse than the data-optimal $115k. Scenario 3 (The Crash) shows most starkly how a single miscalibrated parameter — the intercept — can dominate all other prediction error; the feature weights are identical to Scenario 1 yet the MAE is nearly 2.5× worse. This illustrates that even correct relative weights are useless if the baseline is wrong, which is precisely why the data-driven intercept of ~$400k is so important.

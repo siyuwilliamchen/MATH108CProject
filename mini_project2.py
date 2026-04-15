@@ -165,11 +165,10 @@ def define_weight_vectors() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         Location weights amplified 3x; structure weights shrunk to near zero.
         A shack on the beach is worth millions.
 
-    Scenario 3 — "The Luxury Premium" (Custom)
-        Archetype: Buyers only care about quality and ocean proximity.
-        Structure quality weight doubled; all distance weights except OCEAN_DIST set to zero.
-        Age heavily penalized (luxury buyers want new construction).
-        Intercept inflated to reflect a premium market baseline.
+    Scenario 3 — "The Crash" (Archetype A)
+        Global level shift: same relative weights as Scenario 1 (Rational Market),
+        but the intercept is massively dropped to simulate a recession/market crash.
+        Every house loses the same flat amount of baseline value.
     """
 
     # ── Scenario 1: Baseline (Rational Market) ──────────────────────────────
@@ -206,25 +205,25 @@ def define_weight_vectors() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
          30_000,   # w10 HWY_DIST
     ])
 
-    # ── Scenario 3: The Luxury Premium ──────────────────────────────────────
-    #   Name: "The Luxury Premium"
-    #   Logic: Only ocean proximity and build quality matter.
-    #          Buyers are wealthy and ignore age/lot size/subcenter distance.
-    #          Intercept is higher to reflect a luxury market baseline.
+    # ── Scenario 3: The Crash (Archetype A) ─────────────────────────────────
+    #   Name: "The Crash"
+    #   Logic: Same relative weights as Scenario 1 (Rational Market).
+    #          Intercept is massively dropped to -$100k to simulate a recession:
+    #          every home loses ~$300k of baseline value regardless of features.
     w3 = np.array([
-        500_000,    # w0  intercept (luxury premium baseline)
-        # Structure
-         70_000,    # w1  TOT_LVG_AREA  (space still matters)
-          5_000,    # w2  LND_SQFOOT    (lot size irrelevant to luxury buyer)
-        120_000,    # w3  structure_quality (doubled — luxury = top quality)
-        -50_000,    # w4  age           (new construction heavily preferred)
-         40_000,    # w5  SPEC_FEAT_VAL (upgrades valued)
-        # Location — only ocean matters
-       -160_000,    # w6  OCEAN_DIST    (primary driver)
-              0,    # w7  WATER_DIST    (irrelevant)
-              0,    # w8  CNTR_DIST     (irrelevant — luxury buyers drive)
-              0,    # w9  SUBCNTR_DI    (irrelevant)
-              0,    # w10 HWY_DIST      (irrelevant)
+       -100_000,    # w0  intercept (crashed baseline — severe recession)
+        # Structure — identical relative weights to Scenario 1
+         70_000,    # w1  TOT_LVG_AREA
+         25_000,    # w2  LND_SQFOOT
+         55_000,    # w3  structure_quality
+        -15_000,    # w4  age
+         28_000,    # w5  SPEC_FEAT_VAL
+        # Location — identical relative weights to Scenario 1
+        -50_000,    # w6  OCEAN_DIST
+        -20_000,    # w7  WATER_DIST
+        -20_000,    # w8  CNTR_DIST
+        -12_000,    # w9  SUBCNTR_DI
+         10_000,    # w10 HWY_DIST
     ])
 
     return w1, w2, w3
@@ -526,7 +525,7 @@ if __name__ == "__main__":
     mae_dict = {
         "Scenario 1\n(Baseline)":  mae_s1,
         "Scenario 2\n(Location)":  mae_s2,
-        "Scenario 3\n(Luxury)":    mae_s3,
+        "Scenario 3\n(The Crash)": mae_s3,
         "Least Squares\n(Optimal)": mae_ls,
     }
 
