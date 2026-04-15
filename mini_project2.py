@@ -17,6 +17,8 @@ Phases:
 import os
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')          # non-interactive backend — saves to file, no display window
 import matplotlib.pyplot as plt
 
 # ── Configuration ─────────────────────────────────────────────────────────────
@@ -329,7 +331,7 @@ def plot_mae_barchart(mae_dict: dict, save_path: str = "mae_scoreboard.png"):
     ax.grid(axis="y", linestyle="--", alpha=0.5)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    plt.close()
     print(f"Bar chart saved to {save_path}")
 
 
@@ -357,14 +359,14 @@ def translate_coefficient(w_z: float, feature: str, stats: dict) -> dict:
     delta_w0  = beta  * w_z          # shift to intercept
 
     return {
-        "feature":     feature,
-        "mu":          round(mu, 4),
-        "sigma":       round(sigma, 4),
-        "alpha (1/σ)": round(alpha, 6),
-        "beta (-μ/σ)": round(beta, 6),
+        "feature":        feature,
+        "mu":             round(mu, 4),
+        "sigma":          round(sigma, 4),
+        "alpha (1/sig)":  round(alpha, 6),
+        "beta (-mu/sig)": round(beta, 6),
         "w_z (scaled)":   round(w_z, 4),
         "w_x (original)": round(w_x, 4),
-        "delta_w0":        round(delta_w0, 2),
+        "delta_w0":       round(delta_w0, 2),
     }
 
 
@@ -376,16 +378,16 @@ if __name__ == "__main__":
 
     # ── Load data ─────────────────────────────────────────────────────────────
     print("=" * 65)
-    print("MINI-PROJECT 2 — THE VALUATION ENGINE")
+    print("MINI-PROJECT 2 - THE VALUATION ENGINE")
     print("=" * 65)
 
     df = load_data(DATA_PATH)
     print(f"\nDataset loaded:  {df.shape[0]} rows, {df.shape[1]} columns")
 
     # ── Phase 1: Build X and y ────────────────────────────────────────────────
-    print("\n" + "─" * 65)
-    print("PHASE 1 — Build X and y")
-    print("─" * 65)
+    print("\n" + "-" * 65)
+    print("PHASE 1 - Build X and y")
+    print("-" * 65)
 
     X, y, stats = build_X_and_y(df)
     n, d = X.shape
@@ -395,36 +397,36 @@ if __name__ == "__main__":
     print(f"    Location   ({len(LOCATION_FEATURES)}): {LOCATION_FEATURES}")
     print(f"  Intercept column   : 1 (column 0, NOT standardized)")
     print(f"  Scaling            : Z-score on all feature columns")
-    print(f"\n  X shape : {X.shape}  — expected ({n}, {d})  ✓")
-    print(f"  y shape : {y.shape}  — expected ({n},)      ✓")
+    print(f"\n  X shape : {X.shape}  - expected ({n}, {d})  OK")
+    print(f"  y shape : {y.shape}  - expected ({n},)      OK")
     print(f"  d = p + 1 = {len(ALL_FEATURES)} + 1 = {d}")
 
     # Sanity-check: intercept column is all ones
     assert np.all(X[:, 0] == 1.0), "Intercept column must be all ones!"
-    print("  Intercept column check: PASS  ✓")
+    print("  Intercept column check: PASS")
 
     # ── Phase 2: Model summary ────────────────────────────────────────────────
-    print("\n" + "─" * 65)
-    print("PHASE 2 — Model Definitions")
-    print("─" * 65)
-    print(f"  Scalar model (house i): ŷ_i = w0 + w1·z1_i + ... + w{d-1}·z{d-1}_i")
-    print(f"  Matrix model           : ŷ = Xw")
-    print(f"  Dimensions             : X({n}×{d}) @ w({d}) = ŷ({n})")
+    print("\n" + "-" * 65)
+    print("PHASE 2 - Model Definitions")
+    print("-" * 65)
+    print(f"  Scalar model (house i): y_i = w0 + w1*z1_i + ... + w{d-1}*z{d-1}_i")
+    print(f"  Matrix model           : y = Xw")
+    print(f"  Dimensions             : X({n}x{d}) @ w({d}) = y({n})")
     print(f"  i-th entry of Xw       : predicted sale price of house i ($)")
     print(f"  Xw is defined because  : X has {d} columns, w has {d} rows (match).")
 
     # ── Phase 3: Decision B — Market Scenarios ────────────────────────────────
-    print("\n" + "─" * 65)
-    print("PHASE 3 — Market Scenarios  P = XW")
-    print("─" * 65)
+    print("\n" + "-" * 65)
+    print("PHASE 3 - Market Scenarios  P = XW")
+    print("-" * 65)
 
     w1, w2, w3 = define_weight_vectors()
     W = build_scenario_matrix(w1, w2, w3)
 
-    print(f"  W shape : {W.shape}  — expected ({d}, 3)")
+    print(f"  W shape : {W.shape}  - expected ({d}, 3)")
 
     P = X @ W    # P = XW  — all three scenarios at once  (n×3)
-    print(f"  P shape : {P.shape}  — expected ({n}, 3)")
+    print(f"  P shape : {P.shape}  - expected ({n}, 3)")
 
     # Interpretation of P[4, 1]  (0-indexed: house 5, scenario 2)
     print(f"\n  P[4, 1] = ${P[4, 1]:,.0f}")
@@ -432,9 +434,9 @@ if __name__ == "__main__":
     print("  that house #5 (index 4) would sell for the amount shown above.")
 
     # ── Manual Gate: coefficient translation ─────────────────────────────────
-    print("\n" + "─" * 65)
-    print("MANUAL GATE — Coefficient Translation (TOT_LVG_AREA, Scenario 1)")
-    print("─" * 65)
+    print("\n" + "-" * 65)
+    print("MANUAL GATE - Coefficient Translation (TOT_LVG_AREA, Scenario 1)")
+    print("-" * 65)
 
     audit = translate_coefficient(
         w_z     = w1[1],           # Scenario 1 weight for TOT_LVG_AREA
@@ -447,15 +449,15 @@ if __name__ == "__main__":
     print(f"  area adds approximately ${audit['w_x (original)']:,.2f} to the predicted price.")
 
     # ── Phase 4: Valuation Audit (Partitioned Matrices) ──────────────────────
-    print("\n" + "─" * 65)
-    print("PHASE 4 — Valuation Audit (Partitioned Matrices)")
-    print("─" * 65)
+    print("\n" + "-" * 65)
+    print("PHASE 4 - Valuation Audit (Partitioned Matrices)")
+    print("-" * 65)
 
     print("  Block decomposition of X:")
     print(f"    X  = [ 1 | X_struc | X_loc ]")
     print(f"         col 0 | cols 1-{len(STRUCTURE_FEATURES)} | cols {1+len(STRUCTURE_FEATURES)}-{d-1}")
     print()
-    print("  ŷ = w0·1  +  X_struc·w_struc  +  X_loc·w_loc")
+    print("  y = w0*1  +  X_struc*w_struc  +  X_loc*w_loc")
     print("         ^           ^                    ^")
     print("       Base    Structure Value       Location Value")
 
@@ -466,7 +468,7 @@ if __name__ == "__main__":
         n_struc=len(STRUCTURE_FEATURES),
         n_loc  =len(LOCATION_FEATURES),
     )
-    print(f"\n  Breakdown Table — first 5 houses (Scenario 1, Baseline):")
+    print(f"\n  Breakdown Table - first 5 houses (Scenario 1, Baseline):")
     print(table.to_string(index=False))
 
     # Verify partition sum equals X @ w1
@@ -475,27 +477,27 @@ if __name__ == "__main__":
                     + X[:, 6:]  @ w1[6:]
     y_hat_direct    = X @ w1
     partition_ok    = np.allclose(y_hat_partition, y_hat_direct)
-    print(f"\n  Partition sum == X @ w1  :  {'PASS ✓' if partition_ok else 'FAIL ✗'}")
+    print(f"\n  Partition sum == X @ w1  :  {'PASS' if partition_ok else 'FAIL'}")
 
     # ── Phase 5: Least Squares ────────────────────────────────────────────────
-    print("\n" + "─" * 65)
-    print("PHASE 5 — Least Squares Benchmark")
-    print("─" * 65)
+    print("\n" + "-" * 65)
+    print("PHASE 5 - Least Squares Benchmark")
+    print("-" * 65)
 
     # Part A: Underdetermined case
     X_small = X[:5]
     y_small = y[:5]
-    print(f"  Part A — X_small shape: {X_small.shape}  (5 equations, {d} unknowns)")
-    print(f"  → Underdetermined: infinitely many solutions exist.")
-    print(f"    We cannot find a unique w that satisfies X_small·w = y_small.")
+    print(f"  Part A - X_small shape: {X_small.shape}  (5 equations, {d} unknowns)")
+    print(f"  -> Underdetermined: infinitely many solutions exist.")
+    print(f"    We cannot find a unique w that satisfies X_small*w = y_small.")
 
     # Part B: Optimal weights via least squares on full dataset
     w_ls = fit_least_squares(X, y)
-    print(f"\n  Part B — Least-squares weight for TOT_LVG_AREA:")
+    print(f"\n  Part B - Least-squares weight for TOT_LVG_AREA:")
     print(f"    LS weight  (scaled) : {w_ls[1]:,.2f}")
     print(f"    Manual w1 (scaled)  : {w1[1]:,.2f}")
     higher = "higher" if w_ls[1] > w1[1] else "lower"
-    print(f"    → LS weight is {higher} than the manual choice.")
+    print(f"    -> LS weight is {higher} than the manual choice.")
 
     # Part C: Intercept experiment
     X_no_int = X[:, 1:]     # drop column of ones
@@ -504,18 +506,18 @@ if __name__ == "__main__":
     mae_ls         = compute_mae(y, X        @ w_ls)
     mae_ls_no_int  = compute_mae(y, X_no_int @ w_ls_no_int)
 
-    print(f"\n  Part C — Intercept Experiment:")
+    print(f"\n  Part C - Intercept Experiment:")
     print(f"    MAE with intercept    : ${mae_ls:,.0f}")
     print(f"    MAE without intercept : ${mae_ls_no_int:,.0f}")
     diff = mae_ls_no_int - mae_ls
     print(f"    Removing intercept worsens MAE by ${diff:,.0f}")
-    print("    → Forcing the regression line through the origin is a bad idea")
+    print("    -> Forcing the regression line through the origin is a bad idea")
     print("      because real estate has non-zero 'land value' even for 0 features.")
 
     # ── Evaluation: MAE Scoreboard ────────────────────────────────────────────
-    print("\n" + "─" * 65)
-    print("EVALUATION — MAE Scoreboard (4 Models)")
-    print("─" * 65)
+    print("\n" + "-" * 65)
+    print("EVALUATION - MAE Scoreboard (4 Models)")
+    print("-" * 65)
 
     mae_s1 = compute_mae(y, X @ w1)
     mae_s2 = compute_mae(y, X @ w2)
@@ -529,12 +531,12 @@ if __name__ == "__main__":
     }
 
     print(f"\n  {'Model':<28} {'MAE':>15}")
-    print(f"  {'─'*28} {'─'*15}")
+    print(f"  {'-'*28} {'-'*15}")
     for model, mae in mae_dict.items():
         label = model.replace("\n", " ")
         print(f"  {label:<28} ${mae:>14,.0f}")
 
-    print("\n  → Least Squares has the lowest MAE (optimal by definition).")
+    print("\n  -> Least Squares has the lowest MAE (optimal by definition).")
     print("    Hand-chosen weights are a useful sanity check but cannot beat")
     print("    the data-driven solution.")
 
