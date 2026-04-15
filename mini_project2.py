@@ -1,3 +1,4 @@
+
 """
 Mini-Project 2: The Valuation Engine
 Math 108C: Applied Linear Algebra
@@ -13,13 +14,15 @@ Phases:
     Evaluation - MAE Scoreboard & Bar Chart
 """
 
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-DATA_PATH = "miami-housing.csv"     # place CSV in the same directory
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH  = os.path.join(SCRIPT_DIR, "miami-housing.csv")
 
 # Decision A: chosen features and their categories
 STRUCTURE_FEATURES = [
@@ -535,7 +538,7 @@ if __name__ == "__main__":
     print("    Hand-chosen weights are a useful sanity check but cannot beat")
     print("    the data-driven solution.")
 
-    plot_mae_barchart(mae_dict)
+    plot_mae_barchart(mae_dict, save_path=os.path.join(SCRIPT_DIR, "mae_scoreboard.png"))
 
     # ── Final summary ─────────────────────────────────────────────────────────
     print("\n" + "=" * 65)
